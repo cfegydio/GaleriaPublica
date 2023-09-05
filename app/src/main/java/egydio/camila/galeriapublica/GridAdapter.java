@@ -24,7 +24,7 @@ public class GridAdapter extends PagingDataAdapter<ImageData, MyViewHolder> {
         @Override
         public MyViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
             LayoutInflater layoutInflater = LayoutInflater.from(parent.getContext());
-            View view = layoutInflater.inflate(R.layout.list_item, parent,
+            View view = layoutInflater.inflate(R.layout.grid_item, parent,
                     false);
             return new MyViewHolder(view);
         }
