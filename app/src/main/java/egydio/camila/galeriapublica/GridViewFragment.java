@@ -3,48 +3,60 @@ package egydio.camila.galeriapublica;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProvider;
+import androidx.paging.PagingData;
+import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 /**
  * A simple {@link Fragment} subclass.
- * Use the {@link GridViewFragment#newInstance} factory method to
+ * Use the {@link ListViewFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
 public class GridViewFragment extends Fragment {
+    private MainViewModel mViewModel;
+    private View view;
 
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-
-    public GridViewFragment() {
-        // Required empty public constructor
-    }
-
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment GridViewFragment.
-     */
-    // TODO: Rename and change types and number of parameters
     public static GridViewFragment newInstance() {
-        GridViewFragment fragment = new GridViewFragment();
-        return fragment;
+        return new GridViewFragment();
     }
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        view = inflater.inflate(R.layout.fragment_grid_view, container, false);
+        return view;
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_grid_view, container, false);
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+
+
+        super.onViewCreated(view, savedInstanceState);
+        mViewModel = new ViewModelProvider(getActivity()).get(MainViewModel.class);
+        GridAdapter gridAdapter = new GridAdapter(new ImageDataComparator());
+        LiveData<PagingData<ImageData>> liveData = mViewModel.getPageLv();
+        liveData.observe(getViewLifecycleOwner(), new Observer<PagingData<ImageData>>() {
+            @Override
+            public void onChanged(PagingData<ImageData> objectPagingData) {
+                gridAdapter.submitData(getViewLifecycleOwner().getLifecycle(),objectPagingData);
+            }
+        });
+
+        RecyclerView rvGallery = (RecyclerView) view.findViewById(R.id.rc_grid);
+        rvGallery.setAdapter(gridAdapter);
+        float w = getContext().getResources().getDimension(R.dimen.itemWidth);
+        int numberOfColumns = Util.calculateNoOfColumns(getContext(),w);
+        GridLayoutManager gridLayoutManager = new GridLayoutManager(getContext(), numberOfColumns);
+        rvGallery.setLayoutManager(gridLayoutManager);
     }
 }
